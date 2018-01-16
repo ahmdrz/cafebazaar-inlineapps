@@ -49,7 +49,7 @@ def main(args):
             name = trim_space(app_soap.select_one('.app-name').find('h1').text)
             apps.append([name, float(fix_number(total_rate)), rates])
 
-    if args["sort"]:
+    if not args["sort"]:
         apps.sort(key=operator.itemgetter(1), reverse=True)
     else:
         def compare(x, y):
@@ -65,7 +65,7 @@ def main(args):
         print "number : {}".format(i)
         print u"name : {}".format(app[0])
         print "users : {}".format(sum(app[2].values()))
-        print "rate : {} ({})".format(app[2], calculate_total_rate(app[2]))
+        print "rate : {} ({}/{})".format(app[2], app[1], calculate_total_rate(app[2]))
         print "-----------------"
 
 
