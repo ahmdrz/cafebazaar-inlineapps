@@ -28,7 +28,7 @@ optional arguments:
 
 ---
 
-results at `Tue Jan 16, 17:34:00` based on :
+results at `Tue Jan 16, 17:34:00` based on users :
 
 ```
 number : 0
