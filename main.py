@@ -5,6 +5,13 @@ import operator
 import argparse
 
 
+def calculate_total_rate(d):
+    s = 0
+    for key, value in d.items():
+        s += key * value
+    return s
+
+
 def trim_space(text):
     return re.sub('^\s+|\s+$', '', text)
 
@@ -34,21 +41,19 @@ def main(args):
             app_soap = bs4.BeautifulSoup(html, 'html.parser')
             modal = app_soap.select_one('#dlAppRatingModal')
             total_rate = trim_space(modal.find('h2', {'class': 'rating-total'}).text)
-            total_count = trim_space(modal.find('h4', {'class': 'rating-total-count'}).text)
+
+            rates = dict()
+            for i, rate_detail in enumerate(modal.select('.rating-details .pull-right')):
+                rates[5 - i] = int(fix_number(trim_space(rate_detail.text)))
+
             name = trim_space(app_soap.select_one('.app-name').find('h1').text)
-            apps.append([name, int(fix_number(total_count)), float(fix_number(total_rate))])
+            apps.append([name, float(fix_number(total_rate)), rates])
 
     if args["sort"]:
-        apps.sort(key=operator.itemgetter(2), reverse=True)
+        apps.sort(key=operator.itemgetter(1), reverse=True)
     else:
         def compare(x, y):
-            # TODO: wait for developers@cafebazaar.ir reply.
-            if y[1] == 0:
-                y[1] = 1
-            if x[1] == 0:
-                x[1] = 1
-
-            return int(x[2] * x[1] - y[2] * y[1])
+            return calculate_total_rate(x[2]) - calculate_total_rate(y[2])
 
         apps.sort(cmp=compare, reverse=True)
 
@@ -59,8 +64,8 @@ def main(args):
     for i, app in enumerate(apps):
         print "number : {}".format(i)
         print u"name : {}".format(app[0])
-        print "users : {}".format(app[1])
-        print "rate : {}".format(app[2])
+        print "users : {}".format(sum(app[2].values()))
+        print "rate : {} ({})".format(app[2], calculate_total_rate(app[2]))
         print "-----------------"
 
 
