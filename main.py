@@ -1,8 +1,12 @@
+# -*- coding:utf-8 -*-
+
 import bs4
 import re
 import cafebazaar
 import operator
 import argparse
+import time
+import codecs
 
 
 def calculate_total_rate(d):
@@ -46,7 +50,8 @@ def main(args):
             for i, rate_detail in enumerate(modal.select('.rating-details .pull-right')):
                 rates[5 - i] = int(fix_number(trim_space(rate_detail.text)))
 
-            name = trim_space(app_soap.select_one('.app-name').find('h1').text)
+            # name = trim_space(app_soap.select_one('.app-name').find('h1').text)
+            name = trim_space(link)
             apps.append([name, float(fix_number(total_rate)), rates])
 
     if not args["sort"]:
@@ -61,12 +66,11 @@ def main(args):
     if count != -1:
         apps = apps[:count]
 
-    for i, app in enumerate(apps):
-        print "number : {}".format(i)
-        print u"name : {}".format(app[0])
-        print "users : {}".format(sum(app[2].values()))
-        print "rate : {} ({}/{})".format(app[2], app[1], calculate_total_rate(app[2]))
-        print "-----------------"
+    with codecs.open('score_sheet.csv', 'a', encoding='utf-8') as f:
+        csv_row = '"{}","{}","{}","{}"\n'
+        for i, app in enumerate(apps):
+            f.write(csv_row.format(time.strftime("%c"), app[0], sum(app[2].values()),
+                                   calculate_total_rate(app[2])))
 
 
 if __name__ == "__main__":
@@ -76,3 +80,4 @@ if __name__ == "__main__":
     ap.add_argument("-c", "--count", default=-1, type=int,
                     help="count of inline-apps")
     main(vars(ap.parse_args()))
+    print "Saved to score_sheet.csv"
